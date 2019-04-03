@@ -60,7 +60,7 @@ metadata:
   name: user
   namespace: sockshop
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
