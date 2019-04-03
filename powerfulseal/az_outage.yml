@@ -1,0 +1,23 @@
+config:
+  minSecondsBetweenRuns: 2400
+  maxSecondsBetweenRuns: 3600
+
+nodeScenarios:
+  - name: "Availability Zone Outage"
+    match:
+      - property:
+          name: "az"
+          value: "us-east-1a"
+    filters:
+      - property:
+          name: "group"
+          value: "nodes"
+    actions:
+      - execute:
+          cmd: "sudo systemctl stop docker"
+      - wait:
+          seconds: 600
+      - execute:
+          cmd: "sudo systemctl start docker"
+
+podScenarios: []
