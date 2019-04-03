@@ -1,0 +1,18 @@
+config:
+  minSecondsBetweenRuns: 2400
+  maxSecondsBetweenRuns: 3600
+
+nodeScenarios: []
+
+podScenarios:
+  - name: "Degraded Catalogue"
+    match:
+      - labels:
+          namespace: "sockshop"
+          selector: "app=catalogue"
+    filters:
+      - randomSample:
+          ratio: 0.5
+    actions:
+      - kill:
+          force: true
