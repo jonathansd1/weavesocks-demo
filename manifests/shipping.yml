@@ -1,0 +1,71 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: shipping
+  namespace: sockshop
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: shipping
+        version: v1
+    spec:
+      containers:
+      - name: shipping
+        image: dynatracesockshop/shipping:0.6.0
+        env:
+        - name: JAVA_OPTS
+          value: -Xms128m -Xmx512m -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom
+        - name: DT_TAGS
+          value: "application=sockshop"
+        - name: DT_CUSTOM_PROP
+          value: "SERVICE_TYPE=BACKEND"
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1024Mi
+          requests:
+            cpu: 400m
+            memory: 768Mi
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          timeoutSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          timeoutSeconds: 15
+      volumes:
+        - name: tmp-volume
+          emptyDir:
+            medium: Memory
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shipping
+  labels:
+    app: shipping
+  namespace: sockshop
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    app: shipping
